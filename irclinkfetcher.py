@@ -5,6 +5,7 @@ import sys
 import threading
 import time
 import urllib2
+from HTMLParser import HTMLParser
 
 
 MAX_ACTIVE_FETCHERS = 2
@@ -41,7 +42,12 @@ class Fetcher(threading.Thread):
         m = re.match(r'^.*?<title>(.*?)</title>.*$', text,
                      re.MULTILINE | re.DOTALL)
         if m:
-            msg = ''.join(c for c in m.group(1).strip() if c >= ' ')
+            msg = m.group(1).strip()
+            try:
+                msg = HTMLParser().unescape(msg)
+            except:
+                return
+            msg = ''.join(c for c in msg if c >= ' ')
             self._queue.put(msg)
 
     def _read_url(self):
@@ -84,7 +90,6 @@ class IRCLinkBot(object):
 
             line = self._readline()
             if line and line.strip():
-                print '"%s"' % line
                 s.send('PRIVMSG %s :%s\n' % (self._chan, line,))
 
             time.sleep(0.1)
@@ -102,8 +107,7 @@ class IRCLinkBot(object):
             except Exception as e:
                 print ('exception raised in bot thread, sleeping and ' +
                        're-starting...')
-                print e
-                print type(e)
+                print e, type(e)
                 time.sleep(60)
 
 

@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
 import Queue
 import re
 import socket
@@ -47,7 +51,7 @@ class Fetcher(threading.Thread):
                 msg = HTMLParser().unescape(msg)
             except:
                 return
-            msg = ''.join(c for c in msg if c >= ' ')
+            msg = '«%s»' % ''.join(c for c in msg if c >= ' ')
             self._queue.put(msg)
 
     def _read_url(self):
